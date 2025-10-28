@@ -67,3 +67,4 @@ jobs:
           name: fyne-test-mac
           path: fyne-test.zip
           compression-level: 0
+          
