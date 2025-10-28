@@ -52,7 +52,7 @@ jobs:
           ditto -c -k --sequesterRsrc --keepParent fyne-test.app fyne-test.zip
           ls -lh fyne-test.zip
 
-      - name: Check directory before build2
+      - name: Check directory before build
         run: |
           echo "--- Current working directory ---"
           pwd
