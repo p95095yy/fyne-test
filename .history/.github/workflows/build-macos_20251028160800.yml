@@ -8,12 +8,6 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      # 👇 ここを追加
-      - name: Hello world
-        run: |
-          echo "Hello World from GitHub Actions"
-          date
-
       - name: Checkout source
         uses: actions/checkout@v4
 
@@ -28,23 +22,43 @@ jobs:
       - name: Install ImageMagick
         run: brew install imagemagick
 
+      - name: Check working directory before icon creation
+        run: |
+          echo "--- pwd ---"
+          pwd
+          echo "--- ls ---"
+          ls -a
+
       - name: Create dummy icon
         run: |
-          mkdir -p fyne-test
-          convert -size 64x64 xc:skyblue -gravity center -pointsize 20 \
-            -annotate 0 "App" fyne-test/Icon.png
+          echo "--- creating dummy icon ---"
+          magick -size 64x64 xc:skyblue -gravity center -pointsize 20 \
+            -annotate 0 "App" Icon.png
+          echo "--- after create ---"
+          ls -l
+          file Icon.png || true
+
+      - name: Check directory again
+        run: |
+          echo "--- after icon creation ---"
+          pwd
+          ls -a
 
       - name: Build app bundle
         run: |
+          echo "--- building fyne package ---"
+          pwd
+          ls -a
           env CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 fyne package \
             -os darwin -name fyne-test -release
           echo "--- .app bundle contents ---"
-          ls -R fyne-test.app
+          ls -R fyne-test.app || true
           echo "--- ditto zip ---"
-          ditto -c -k --sequesterRsrc --keepParent fyne-test.app fyne-test.zip
-          ls -lh fyne-test.zip
+          ditto -c -k --sequesterRsrc --keepParent fyne-test.app fyne-test.zip || true
+          ls -lh fyne-test.zip || true
 
       - name: Upload artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: fyne-test-mac
