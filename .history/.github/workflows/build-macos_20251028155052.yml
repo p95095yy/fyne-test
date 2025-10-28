@@ -1,0 +1,36 @@
+name: Build macOS app
+
+on:
+  workflow_dispatch:  # 手動で実行できるようにする
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Install fyne CLI
+        run: go install fyne.io/tools/cmd/fyne@v1.7.0
+
+      - name: Build app bundle
+        run: |
+          env CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 fyne package \
+            -os darwin -icon "" -name fyne-test -release
+          echo "--- .app bundle contents ---"
+          ls -R fyne-test.app
+          echo "--- ditto zip ---"
+          ditto -c -k --sequesterRsrc --keepParent fyne-test.app fyne-test.zip
+          ls -lh fyne-test.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fyne-test-mac
+          path: fyne-test.zip
